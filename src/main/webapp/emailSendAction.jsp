@@ -20,7 +20,8 @@
 	if(userID == null) {
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
-		script.println("alert('로그인을 해주세요.');");		script.println("location.href = 'userLogin.jsp'");
+		script.println("alert('로그인을 해주세요.');");	
+		script.println("location.href='userLogin.jsp'");
 		script.println("</script>");
 		script.close();
 		return;
@@ -37,13 +38,14 @@
 	}
 	
 	String host = "http://localhost:8080/Lecture_Evaluation/";
-	String from = "이메일 아이디";
+	String from = "rlatjdgns4238@gmail.com";
 	String to = userDAO.getUserEmail(userID);
 	String subject = "강의평가를 위한 이메일 확인 메일입니다.";
 	String content = "다음 링크에 접속하여 이메일 확인을 진행하세요." +
 		"<a href='" + host + "emailCheckAction.jsp?code=" + new SHA256().getSHA256(to) + "'>이메일 인증하기</a>";
 	
 	Properties p = new Properties();
+	
 	p.put("mail.smtp.user", from);
 	p.put("mail.smtp.host", "smtp.googlemail.com");
 	p.put("mail.smtp.port", "465");
@@ -53,6 +55,7 @@
 	p.put("mail.smtp.socketFactory.port", "465");
 	p.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 	p.put("mail.smtp.socketFactory.fallback", "false");
+	p.put("mail.smtp.ssl.protocols", "TLSv1.2");
 	 
 	try{
 	    Authenticator auth = new Gmail();
@@ -74,7 +77,8 @@
 		script.println("history.back();");
 		script.println("</script>");
 		script.close();		
-	    return;	}
+	    return;
+	}
 %>
 
 <!DOCTYPE html>

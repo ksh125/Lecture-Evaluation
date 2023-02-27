@@ -1,4 +1,9 @@
+<%@page import="java.net.URLEncoder"%>
+<%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
+<%@page import="evaluation.EvaluationDAO"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="evaluation.EvaluationDTO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -14,11 +19,35 @@
 </head>
 <body>
 <%
-	String userID = null;
-	if(session.getAttribute("userID") != null) {
-		userID = (String) session.getAttribute("userID");
+	request.setCharacterEncoding("UTF-8");
+	String lectureDivide = "전체";
+	String searchType = "최신순";
+	String search = "";
+	int pageNumber = 0;
+	if(request.getParameter("lectureDivide") != null) {
+		lectureDivide = request.getParameter("lectureDivide");
 	}
-%>
+	if(request.getParameter("searchType") != null) {
+		searchType = request.getParameter("searchType");
+	}
+	if(request.getParameter("search") != null) {
+		search = request.getParameter("search");
+	}
+	if(request.getParameter("pageNumber") != null) {
+		try {
+			pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
+		} catch (Exception e) {
+			System.out.println("검색 페이지 번호 오류");
+		}
+	}
+	String userID = null;
+
+	if(session.getAttribute("userID") != null) {
+
+		userID = (String) session.getAttribute("userID");
+
+	}
+%>	
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<a class="navbar-brand" href="index.jsp">강의평가 웹 사이트</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse"
@@ -31,11 +60,13 @@
 					href="index.jsp">메인</a></li>
 				<li class="nav-item dropdown"><a
 					class="nav-link dropdown-toggle" id="dropdown"
-					data-toggle="dropdown">회원 관리</a>
+					data-toggle="dropdown">회원 관리 </a>
 					<div class="dropdown-menu" aria-labelledby="dropdown">
-					<% if(userID == null) { %>
+					<%
+						if(userID == null) {
+					%>
 						<a class="dropdown-item" href="userLogin.jsp">로그인</a>
-						<a class="dropdown-item" href="userJoin.jsp">회원가입</a>
+						<a class="dropdown-item" href="userRegister.jsp">회원가입</a>
 					<% } else { %>
 						<a class="dropdown-item" href="userLogout.jsp">로그아웃</a>
 					<% } %>
@@ -61,99 +92,76 @@
 				placeholder="내용을 입력하세요.">
 			<button type="submit" class="btn btn-primary mx-1 mt-2">검색</button>
 			<a class="btn btn-primary mx-1 mt-2" data-toggle="modal"
-				href="#registerModal">등록하기</a> <a class="btn btn-danger ml-1 mt-2"
-				data-toggle="modal" href="#reportModal">신고</a>
+				href="#registerModal">등록하기</a>
+				<a class="btn btn-danger ml-1 mt-2"
+					data-toggle="modal" href="#reportModal">신고</a>
 		</form>
+		<%
+
+			ArrayList<EvaluationDTO> evaluationList = new ArrayList<EvaluationDTO>();
+			evaluationList = new EvaluationDAO().getList(lectureDivide, searchType, search, pageNumber);
+			if(evaluationList != null)
+			for(int i = 0; i < evaluationList.size(); i++) {
+				if(i == 5) break;
+				EvaluationDTO evaluation = evaluationList.get(i);
+		%>
 		<div class="card bg-light mt-3">
 			<div class="card-header bg-light">
 				<div class="row">
-					<div class="col-8 text-left">컴퓨터개론&nbsp;<small>나동빈</small>
-					</div>
-					<div class="col-4 text-right">종합 <span style="color: red;">A</span>
-					</div>
-				</div>
-			</div>
-			<div class="card-body">
-				<h5 class="card-title">정말 좋은 강의에요.&nbsp;<small>(2017년 가을학기)</small>
-				</h5>
-				<p class="card-text">강의가 많이 널널해서, 솔직히 많이 배운 건 없는 것 같지만 학점도 잘 나오고 너무 좋은 것 같습니다.</p>
-				<div class="row">
-					<div class="col-9 text-left">
-						성적<span style="color: red;">A</span>
-						널널 <span style="color: red;">A</span>
-						강의 <span style="color: red;">B</span>
-						<span style="color: green;">(추천: 15★)</span>
-					</div>
-					<div class="col-3 text-right">
-						<a onclick="return confirm('추천하시겠습니까?')"
-							href="./likeAction.jsp?evaluationID=">추천</a> <a
-							onclick="return confirm('삭제하시겠습니까?')"
-							href="./deleteAction.jsp?evaluationID=">삭제</a>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="card bg-light mt-3">
-			<div class="card-header bg-light">
-				<div class="row">
-					<div class="col-8 text-left">컴퓨터그래픽스&nbsp;<small>홍길동</small>
-					</div>
-					<div class="col-4 text-right">종합 <span style="color: red;">B</span>
-					</div>
-				</div>
-			</div>
-			<div class="card-body">
-				<h5 class="card-title">나쁘지 않은 것 같습니다.&nbsp;<small>(2017년 여름학기)</small>
-				</h5>
-				<p class="card-text">컴퓨터그래픽스를 처음 배웠는데, 상당히 재미있었던 것 같아요.</p>
-				<div class="row">
-					<div class="col-9 text-left">
-						성적 <span style="color: red;">B</span> 널널 <span style="color: red;">C</span>
-						강의 <span style="color: red;">B</span> <span style="color: green;">(추천:
-							1)</span>
-					</div>
-					<div class="col-3 text-right">
-						<a onclick="return confirm('추천하시겠습니까?')"
-							href="./likeAction.jsp?evaluationID=">추천</a> <a
-							onclick="return confirm('삭제하시겠습니까?')"
-							href="./deleteAction.jsp?evaluationID=">삭제</a>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="card bg-light mt-3">
-			<div class="card-header bg-light">
-				<div class="row">
-					<div class="col-8 text-left">
-						알고리즘&nbsp;<small>이순신</small>
+					<div class="col-8 text-left"><%=evaluation.getLectureName()%>&nbsp;<small><%=evaluation.getProfessorName()%></small>
 					</div>
 					<div class="col-4 text-right">
-						종합 <span style="color: red;">A</span>
+						종합 <span style="color: red;"><%=evaluation.getTotalScore()%></span>
 					</div>
 				</div>
 			</div>
 			<div class="card-body">
-				<h5 class="card-title">강의력이 제일 좋은 강의입니다.&nbsp;<small>(2017년 2학기)</small>
+				<h5 class="card-title">
+					<%=evaluation.getEvaluationTitle()%>&nbsp;<small>(<%=evaluation.getLectureYear()%>년
+						<%=evaluation.getSemesterDivide()%>)
+					</small>
 				</h5>
-				<p class="card-text">알고리즘 강의 가르치시는 교수님들 중에서 최고로 잘 가르치십니다.</p>
+				<p class="card-text"><%=evaluation.getEvaluationContent()%></p>
 				<div class="row">
-					<div class="col-9 text-left">성적 <span style="color: red;">A</span> 널널
-					<span style="color: red;">C</span>강의 <span style="color: red;">A</span>
-					<span style="color: green;">(추천: 0)</span>
+					<div class="col-9 text-left">
+						성적 <span style="color: red;"><%=evaluation.getCreditScore()%></span>
+						널널 <span style="color: red;"><%=evaluation.getComfortableScore()%></span>
+						강의 <span style="color: red;"><%=evaluation.getLectureScore()%></span>
+						<span style="color: green;">(추천: <%=evaluation.getLikeCount()%>)
+						</span>
 					</div>
 					<div class="col-3 text-right">
 						<a onclick="return confirm('추천하시겠습니까?')"
-							href="./likeAction.jsp?evaluationID=">추천</a> <a
-							onclick="return confirm('삭제하시겠습니까?')"
-							href="./deleteAction.jsp?evaluationID=">삭제</a>
+							href="./likeAction.jsp?evaluationID=<%=evaluation.getEvaluationID()%>">추천</a>
+						<a onclick="return confirm('삭제하시겠습니까?')"
+							href="./deleteAction.jsp?evaluationID=<%=evaluation.getEvaluationID()%>">삭제</a>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-	<ul class="pagination justify-content-center mt-3">
-		<li class="page-item"><a class="page-link" href="#">이전</a></li>
-		<li class="page-item"><a class="page-link" href="#">다음</a></li>
+		<%
+			}
+		%>
+    </div>
+    <ul class="pagination justify-content-center mt-3">
+		<li class="page-item">
+			<%
+				if (pageNumber <= 0) {
+			%> 
+				<a class="page-link disabled">이전</a>
+			<%
+				} else {
+			%>
+				<a class="page-link"
+				href="./index.jsp?lectureDivide=<%=URLEncoder.encode(lectureDivide, "UTF-8")%>&searchType=<%=URLEncoder.encode(searchType, "UTF-8")%>&search=<%=URLEncoder.encode(search, "UTF-8")%>&pageNumber=<%=pageNumber - 1%>">이전</a>
+			<%
+				}
+			%>
+		</li>
+		<li class="page-item">
+			<a class="page-link" href="./index.jsp?lectureDivide=
+				<%=URLEncoder.encode(lectureDivide, "UTF-8")%>&searchType=<%=URLEncoder.encode(searchType, "UTF-8")%>&search=<%=URLEncoder.encode(search, "UTF-8")%>&pageNumber=<%=pageNumber + 1%>">다음</a>
+		</li>
 	</ul>
 	<div class="modal fade" id="registerModal" tabindex="-1" role="dialog"
 		aria-labelledby="modal" aria-hidden="true">
@@ -163,7 +171,6 @@
 					<h5 class="modal-title" id="modal">평가 등록</h5>
 					<button type="button" class="close" data-dismiss="modal"
 						aria-label="Close">
-
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
@@ -176,13 +183,15 @@
 									class="form-control" maxlength="20">
 							</div>
 							<div class="form-group col-sm-6">
-								<label>교수명</label> <input type="text" name="professorName"
+								<label>교수명</label>
+								<input type="text" name="professorName"
 									class="form-control" maxlength="20">
 							</div>
 						</div>
 						<div class="form-row">
 							<div class="form-group col-sm-4">
-								<label>수강 연도</label> <select name="lectureYear"
+								<label>수강 연도</label>
+								<select name="lectureYear"
 									class="form-control">
 									<option value="2011">2011</option>
 									<option value="2012">2012</option>
@@ -191,7 +200,7 @@
 									<option value="2015">2015</option>
 									<option value="2016">2016</option>
 									<option value="2017">2017</option>
-									<option value="2018">2018</option>
+									<option value="2018" selected>2018</option>
 									<option value="2019">2019</option>
 									<option value="2020">2020</option>
 									<option value="2021">2021</option>
@@ -200,7 +209,8 @@
 								</select>
 							</div>
 							<div class="form-group col-sm-4">
-								<label>수강 학기</label> <select name="semesterDivide"
+								<label>수강 학기</label>
+								<select name="semesterDivide"
 									class="form-control">
 									<option name="1학기" selected>1학기</option>
 									<option name="여름학기">여름학기</option>
@@ -209,7 +219,8 @@
 								</select>
 							</div>
 							<div class="form-group col-sm-4">
-								<label>강의 구분</label> <select name="lectureDivide"
+								<label>강의 구분</label>
+								<select name="lectureDivide"
 									class="form-control">
 									<option name="전공" selected>전공</option>
 									<option name="교양">교양</option>
@@ -220,7 +231,7 @@
 						<div class="form-group">
 							<label>제목</label>
 							<input type="text" name="evaluationTitle"
-								class="form-control" maxlength="30">
+								class="form-control" maxlength="20">
 						</div>
 						<div class="form-group">
 							<label>내용</label>
@@ -229,7 +240,8 @@
 						</div>
 						<div class="form-row">
 							<div class="form-group col-sm-3">
-								<label>종합</label> <select name="totalScore" class="form-control">
+								<label>종합</label>
+								<select name="totalScore" class="form-control">
 									<option value="A" selected>A</option>
 									<option value="B">B</option>
 									<option value="C">C</option>
@@ -238,7 +250,8 @@
 								</select>
 							</div>
 							<div class="form-group col-sm-3">
-								<label>성적</label> <select name="creditScore"
+								<label>성적</label>
+								<select name="creditScore"
 									class="form-control">
 									<option value="A" selected>A</option>
 									<option value="B">B</option>
@@ -248,7 +261,8 @@
 								</select>
 							</div>
 							<div class="form-group col-sm-3">
-								<label>널널</label> <select name="comfortableScore"
+								<label>널널</label>
+								<select name="comfortableScore"
 									class="form-control">
 									<option value="A" selected>A</option>
 									<option value="B">B</option>
@@ -258,7 +272,8 @@
 								</select>
 							</div>
 							<div class="form-group col-sm-3">
-								<label>강의</label> <select name="lectureScore"
+								<label>강의</label>
+									<select name="lectureScore"
 									class="form-control">
 									<option value="A" selected>A</option>
 									<option value="B">B</option>
@@ -315,7 +330,7 @@
 	<!-- 제이쿼리 자바스크립트 추가하기 -->
 	<script src="./js/jquery.min.js"></script>
 	<!-- Popper 자바스크립트 추가하기 -->
-	<script src="./js/popper.js"></script>
+	<script src="./js/popper.min.js"></script>
 	<!-- 부트스트랩 자바스크립트 추가하기 -->
 	<script src="./js/bootstrap.min.js"></script>
 </body>

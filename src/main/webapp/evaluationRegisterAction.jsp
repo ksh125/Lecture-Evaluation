@@ -10,15 +10,6 @@
 	if(request.getParameter("userID") != null) {
 		userID = (String) request.getParameter("userID");
 	}
-	if(userID == null) {
-		PrintWriter script = response.getWriter();
-		script.println("<script>");
-		script.println("alert('로그인을 해주세요')");
-		script.println("location.href=userLogin.jsp'");
-		script.println("</script>");
-		script.close();
-		return;
-	}
 	
 	String lectureName = null;
 	String professorName = null;
@@ -33,7 +24,7 @@
 	String lectureScore = null;
 	
 	if(request.getParameter("lectureName") != null) {
-		userID = (String) request.getParameter("lectureName");
+		lectureName = (String) request.getParameter("lectureName");
 	}
 	if(request.getParameter("professorName") != null) {
 		professorName = (String) request.getParameter("professorName");
@@ -97,9 +88,10 @@
 	} else {
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
-		script.println("location.href='idnex.jsp';");
+		script.println("location.href='index.jsp';");
 		script.println("</script>");
 		script.close();
 		return;
 	}
+	
 %>
